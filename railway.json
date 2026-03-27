@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "name": "LinkVault",
+  "services": {
+    "linkvault-backend": {
+      "source": "backend",
+      "build": {
+        "command": "npm install"
+      },
+      "run": {
+        "command": "node server.js"
+      }
+    }
+  }
+}

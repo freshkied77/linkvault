@@ -1,0 +1,15 @@
+{
+  "name": "linkvault",
+  "version": "1.0.0",
+  "description": "URL Shortener with Ad Revenue - Short links that pay you.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@railway/cli": "^4.35.0"
+  }
+}

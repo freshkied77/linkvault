@@ -1,0 +1,14 @@
+services:
+  - name: linkvault-backend
+    type: web
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: MONGODB_URI
+        value: mongodb+srv://freshkied:Oluwaseun77%26@freelancertoolkit.f4rlroi.mongodb.net/?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: linkvault_secure_key_2024
+      - key: PORT
+        value: 10000
+    plan: free
