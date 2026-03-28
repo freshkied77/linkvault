@@ -45,6 +45,24 @@ app.get('/:shortCode', async (req, res) => {
     link.clickDates.push(new Date());
     await link.save();
     
+    // Ad configuration - Replace with your ad network IDs
+    const AD_NETWORK = process.env.AD_NETWORK || 'propeller'; // 'adsense', 'propeller', 'custom'
+    const AD_ZONE_ID = process.env.AD_ZONE_ID || '';
+    
+    let adContent = '';
+    
+    if (AD_NETWORK === 'propeller' && AD_ZONE_ID) {
+      adContent = `<iframe src="https://publishers.propellerads.com/#${AD_ZONE_ID}" frameborder="0"></iframe>`;
+    } else {
+      // Default: Show affiliate/sponsored content
+      adContent = `
+        <div style="background: linear-gradient(45deg, #ff6b6b, #feca57); padding: 20px; border-radius: 10px; color: #1a1a2e; font-weight: bold;">
+          <p>🎉 Earn money with LinkVault!</p>
+          <p style="font-size: 12px; margin-top: 10px;">Sign up for AdSense or PropellerAds to start earning</p>
+        </div>
+      `;
+    }
+    
     // Serve ad page with redirect
     const adHtml = `
 <!DOCTYPE html>
@@ -53,7 +71,6 @@ app.get('/:shortCode', async (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LinkVault - Redirecting...</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
@@ -90,10 +107,7 @@ app.get('/:shortCode', async (req, res) => {
       color: #00d4ff;
       margin: 20px 0;
     }
-    .message {
-      color: #aaa;
-      font-size: 14px;
-    }
+    .message { color: #aaa; font-size: 14px; }
     .destination {
       margin-top: 20px;
       padding: 15px;
@@ -118,18 +132,11 @@ app.get('/:shortCode', async (req, res) => {
 <body>
   <div class="container">
     <div class="logo">Link<span>Vault</span></div>
-    <div class="ad-container">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-YOUR_ADSENSE_CLIENT_ID"
-           data-ad-slot="YOUR_AD_SLOT_ID"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-    </div>
+    <div class="ad-container">${adContent}</div>
     <div class="timer" id="timer">5</div>
-    <p class="message">Please wait while the page loads...</p>
-    <p class="destination">Destination: ${link.originalUrl.substring(0, 50)}...</p>
-    <button class="skip-btn" onclick="skipAd()">Skip Ad</button>
+    <p class="message">Please wait...</p>
+    <p class="destination">Going to: ${link.originalUrl.substring(0, 40)}...</p>
+    <button class="skip-btn" onclick="skipAd()">Skip</button>
   </div>
   <script>
     let countdown = 5;
@@ -145,7 +152,6 @@ app.get('/:shortCode', async (req, res) => {
     function skipAd() {
       window.location.href = '${link.originalUrl}';
     }
-    (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 </body>
 </html>`;
