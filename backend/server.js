@@ -45,20 +45,45 @@ app.get('/:shortCode', async (req, res) => {
     link.clickDates.push(new Date());
     await link.save();
     
-    // Ad configuration - Replace with your ad network IDs
-    const AD_NETWORK = process.env.AD_NETWORK || 'propeller'; // 'adsense', 'propeller', 'custom'
-    const AD_ZONE_ID = process.env.AD_ZONE_ID || '';
+    // Ad configuration with fallback support for multiple networks
+    const AD_NETWORK_PRIMARY = process.env.AD_NETWORK_PRIMARY || 'admaven'; // Primary ad network
+    const AD_NETWORK_SECONDARY = process.env.AD_NETWORK_SECONDARY || 'propeller'; // Secondary network
+    const AD_NETWORK_TERTIARY = process.env.AD_NETWORK_TERTIARY || 'clicksfly'; // Tertiary network
+    const AD_ZONE_ID_PRIMARY = process.env.AD_ZONE_ID_PRIMARY || '474817'; // AdMaven Zone ID
+    const AD_ZONE_ID_SECONDARY = process.env.AD_ZONE_ID_SECONDARY || ''; // PropellerAds Zone ID (to be added)
+    const AD_ZONE_ID_TERTIARY = process.env.AD_ZONE_ID_TERTIARY || ''; // ClicksFly Zone ID (to be added)
     
     let adContent = '';
     
-    if (AD_NETWORK === 'propeller' && AD_ZONE_ID) {
-      adContent = `<iframe src="https://publishers.propellerads.com/#${AD_ZONE_ID}" frameborder="0"></iframe>`;
-    } else {
-      // Default: Show affiliate/sponsored content
+    // Try primary network first (AdMaven)
+    if (AD_NETWORK_PRIMARY === 'admaven' && AD_ZONE_ID_PRIMARY) {
+      adContent = `<iframe src="https://www.admaden.com/tag/?z=${AD_ZONE_ID_PRIMARY}" frameborder="0" scrolling="no" style="width:100%; height:280px; border:none;"></iframe>`;
+    } 
+    // Try secondary network (PropellerAds)
+    else if (AD_NETWORK_SECONDARY === 'propeller' && AD_ZONE_ID_SECONDARY) {
+      adContent = `<iframe src="https://publishers.propellerads.com/#${AD_ZONE_ID_SECONDARY}" frameborder="0"></iframe>`;
+    }
+    // Try tertiary network (ClicksFly)
+    else if (AD_NETWORK_TERTIARY === 'clicksfly' && AD_ZONE_ID_TERTIARY) {
+      adContent = `<div style="text-align: center; padding: 40px; color: #666;">ClicksFly ad loading...</div>`;
+    }
+    else if (AD_NETWORK_TERTIARY === 'adsense' && AD_ZONE_ID_TERTIARY) {
+      // AdSense integration - expect format: "ca-pub-xxxxxxxxxxxx_1234567890"
+      const [clientId, slotId] = AD_ZONE_ID_TERTIARY.split('_');
+      adContent = `<ins class="adsbygoogle" style="display:block" data-ad-client="${clientId}" data-ad-slot="${slotId || '1234567890'}" data-ad-format="auto" data-full-width-responsive="true"></ins>`;
+    }
+    else {
+      // Default: Show sponsored content that promotes earning
       adContent = `
-        <div style="background: linear-gradient(45deg, #ff6b6b, #feca57); padding: 20px; border-radius: 10px; color: #1a1a2e; font-weight: bold;">
-          <p>🎉 Earn money with LinkVault!</p>
-          <p style="font-size: 12px; margin-top: 10px;">Sign up for AdSense or PropellerAds to start earning</p>
+        <div style="background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%); padding: 30px; border-radius: 15px; text-align: center; color: #1a1a2e; font-weight: 500;">
+          <h3 style="margin: 0 0 15px 0; color: #1a1a2e;">🚀 Start Earning Today!</h3>
+          <p style="margin: 0 0 10px 0; font-size: 16px;">Short links that pay you per click</p>
+          <p style="margin: 0; font-size: 14px; opacity: 0.8;">
+            Sign up at:<br/>
+            <a href="https://www.admaden.com" target="_blank" style="color: #1a1a2e; text-decoration: underline;">AdMaven</a> • 
+            <a href="https://www.propellerads.com" target="_blank" style="color: #1a1a2e; text-decoration: underline;">PropellerAds</a> • 
+            <a href="https://www.clicksfly.com" target="_blank" style="color: #1a1a2e; text-decoration: underline;">ClicksFly</a>
+          </p>
         </div>
       `;
     }
